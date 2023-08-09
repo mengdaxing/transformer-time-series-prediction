@@ -5,6 +5,7 @@ import time
 import math
 from matplotlib import pyplot
 
+from encoder import TransformerEncoderLayer
 from sklearn.preprocessing import MinMaxScaler
 from pandas import read_csv
 from conf import *
@@ -54,8 +55,9 @@ class TransAm(nn.Module):
         
         self.src_mask = None
         self.pos_encoder = PositionalEncoding(feature_size)
-        self.encoder_layer = nn.TransformerEncoderLayer(d_model=feature_size, nhead=10, dropout=dropout)
-        self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)        
+        # self.encoder_layer = nn.TransformerEncoderLayer(d_model=feature_size, nhead=10, dropout=dropout)
+        self.encoder_layer = TransformerEncoderLayer(d_model=feature_size, nhead=10, dropout=dropout)
+        self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=num_layers)
         self.decoder = nn.Linear(feature_size,1)
         self.init_weights()
 
@@ -99,7 +101,7 @@ def get_data():
     time        = np.arange(0, 400, 0.1)
     # amplitude   = np.sin(time) + np.sin(time*0.05) +np.sin(time*0.12) *np.random.normal(-0.2, 0.2, len(time))
 
-    series = read_csv('daily-min-temperatures.csv', header=0, index_col=0, parse_dates=True)
+    series = read_csv(DATA_PATH[1], header=0, index_col=0, parse_dates=True)
     # series = read_csv('daily-min-temperatures.csv', header=0, index_col=0, parse_dates=True, squeeze=True)
 
     scaler = MinMaxScaler(feature_range=(-1, 1)) 
@@ -250,7 +252,7 @@ for epoch in range(1, epochs + 1):
     train(train_data)
     
     
-    if(epoch % 10 is 0):
+    if(epoch % 1 == 0):
         val_loss = plot_and_loss(model, val_data,epoch)
         predict_future(model, val_data,200)
     else:
